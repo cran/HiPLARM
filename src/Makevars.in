@@ -1,0 +1,19 @@
+PKG_CFLAGS = @CFLAGS@
+PKG_LIBS = @LDFLAGS@ @LIBS@
+
+MkInclude = $(R_HOME)/etc${R_ARCH}/Makeconf
+
+H_OBJS = hiplar_at.o hiplar_dgeMatrix.o hiplar_dpoMatrix.o hiplar_dsyMatrix.o hiplar_dtrMatrix.o hiplar_init.o
+P_OBJS = P.o minit.o plasma_dgeMatrix.o plasma_dpoMatrix.o plasma_dsyMatrix.o plasma_dtrMatrix.o plasma_init.o
+M_OBJS = magma_dgeMatrix.o magma_dpoMatrix.o magma_dspMatrix.o magma_dsyMatrix.o magma_dtpMatrix.o magma_dtrMatrix.o setGPU.o magma_init.o
+OBJS = util.o Mutils.o $(P_OBJS) $(M_OBJS) $(H_OBJS)
+
+all: $(SHLIB)
+## making src/*.o 
+# for development:
+#$(SHLIB): $(OBJS)
+# for real:
+$(SHLIB): $(OBJS)
+
+clean:
+	rm -rf $(OBJS) HiPLARM.so

@@ -1,0 +1,4 @@
+useDynLib(HiPLARM)
+import(methods)
+import(Matrix)
+exportPattern("^[[:alpha:]]+")

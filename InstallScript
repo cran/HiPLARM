@@ -1,0 +1,646 @@
+#!/bin/bash
+
+openflag=0
+atlasflag=0
+gpuflag=1
+
+set -- `getopt -n$0 -u -a --longoptions="prefix=: cuda-home=: with-atlas with-openblas no-gpu help" "h" "$@"`
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+Install Script for HiPLARM downloading and building the following libraries
+1: OpenBLAS or ATLAS - Optimised versions of BLAS and LAPACK
+2: Hwloc - Software that finds system architecture
+3: PLASMA - Linear Algebra Routines for multi-core libraries
+4: MAGMA (Optional) - If the user has an NVIDIA GPU and CUDA libraries then the script will build the MAGMA library
+5: HiPLARM - R Package for multi-core and GPU computing
+
+OPTIONS:
+	-h|--help		Help Command
+	--prefix=PREFIX		Install libraries in PREFIX
+	--cuda-home=CUDADIR   	Directory of CUDA installation
+	--with-openblas		Give this flag if the user wishes to install OpenBLAS
+	--with-atlas		Give this flag if the user wishes to use ATLAS
+	--no-gpu		If the user does not have a GPU or wish to build without GPU support
+	
+e.g No GPU support 
+	./InstallScript --with-openblas --no-gpu
+e.g With GPU support and user defined install directory
+	./InstallScript --prefix=/home/jsmyth/mylibraries --with-atlas --cuda-home=/usr/local/cuda
+
+EOF
+}
+
+while [ $# -gt 0 ]
+do
+	    case "$1" in
+		      --prefix=)   BLDDIR=$2;shift;;
+			--cuda-home=) CUDADIR=$2;shift;;
+			--with-openblas) openflag=1;shift;;
+			--with-atlas) atlasflag=1;shift;;
+			--no-gpu) gpuflag=0;shift;;
+			-h|--help)	usage
+					exit 1;;
+			--)        shift;break;;
+			-*)        usage;;
+			*)         break;;            #better be the crawl directory
+			esac	
+			shift
+done
+
+if [ $atlasflag = $openflag ]
+then
+	echo "You have not decided which optimised BLAS library to use or chosen both"
+
+	echo "Please choose A for ATLAS or O for OpenBLAS: "
+	while :
+	do
+	
+	read input_variable
+	if [ "$input_variable" = "A" ] || [ "$input_variable" = "a" ]
+	then
+		echo "Compiling using ATLAS"
+		atlasflag=1
+		openflag=0
+		break
+	elif [ "$input_variable" = "O" ] || [ "$input_variable" = "o" ]
+	then
+		echo "Compiling with OpenBLAS"
+		atlasflag=0
+		openflag=1
+		break
+	else 
+		echo "Please Enter O or A"
+	fi
+	done
+
+fi
+
+if [ -z $BLDDIR ]
+then
+	BLDDIR=$PWD/LALibs
+fi
+
+if [ -d "$BLDDIR" ]
+then
+	cd $BLDDIR
+else
+	mkdir -p $BLDDIR
+	cd $BLDDIR
+fi
+
+
+if [ -z $CUDADIR ]
+then
+	CUDADIR=/usr/local/cuda
+fi
+
+
+if [ ! -d "$BLDDIR/lib" ]
+then
+mkdir lib
+fi
+if [ ! -d "$BLDDIR/include" ]
+then
+mkdir include
+fi
+
+if [ $gpuflag = 1 ]
+then
+echo "Building with GPU support"
+echo "CUDA install directory is $CUDADIR"
+fi
+
+if [ $atlasflag = 1 ]
+then
+	echo "Building with ATLAS"
+fi
+if [ $openflag = 1 ]
+then
+	echo "Building with OpenBLAS"
+fi
+
+echo "Build Directory is $BLDDIR"
+
+
+
+LIBDIR=$BLDDIR/lib
+INCDIR=$BLDDIR/include
+
+NUM_PHYS_CPU=`cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l`
+NUM_CORES=`cat /proc/cpuinfo | grep 'cpu cores' | uniq | sed 's/[a-z]//g' | sed 's/://g'`
+
+let TOTAL_CORES=$[NUM_PHYS_CPU * NUM_CORES]
+
+echo "Found $TOTAL_CORES system cores"
+if [ ! -d $CUDADIR ]
+	then
+		echo "$CUDADIR does not exist, building without GPU support"
+		gpuflag=0
+	fi
+sleep 5
+
+if [ $openflag = 1 ]
+then
+	##### Start off by install hwloc ##########
+	if [ ! -f "$BLDDIR/hwloc-1.5.tar.gz" ]
+	then
+		wget http://www.open-mpi.org/software/hwloc/v1.5/downloads/hwloc-1.5.tar.gz
+
+	fi
+	
+	if [ ! -d "$BLDDIR/hwloc-1.5" ]
+	then
+		tar -xf hwloc-1.5.tar.gz
+	fi
+
+	cd hwloc-1.5
+	./configure --prefix="$BLDDIR"
+	make && make install
+	export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$LIBDIR/pkgconfig
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBDIR
+
+	### Done #############
+
+	cd $BLDDIR
+
+	## Now install our optimised BLAS, OpenBLAS is easiest for this ################
+	if [ ! -f "$BLDDIR/OpenBLAS.tar.gz" ]	
+	then
+		wget -O - https://github.com/xianyi/OpenBLAS/tarball/master > OpenBLAS.tar.gz
+	fi
+
+	tar -xf OpenBLAS.tar.gz
+	cd xianyi*
+	sed -i 's/# NO_AFFINITY = 1/NO_AFFINITY = 1/' Makefile.rule
+	make
+	make PREFIX=$BLDDIR install
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBDIR
+
+	#### Done #############################
+
+	cd $BLDDIR
+
+	### Now for PLASMA #############
+	if [ ! -f "$BLDDIR/plasma-installer_2.4.5.tar.gz" ]
+	then
+		wget http://icl.cs.utk.edu/projectsfiles/plasma/pubs/plasma-installer_2.4.5.tar.gz
+	fi
+	if [ ! -d "$BLDDIR/plasma-installer_2.4.5" ]
+	then
+		tar -xf plasma-installer_2.4.5.tar.gz
+	fi
+	cd plasma-installer_2.4.5
+	
+	export OPENBLAS_NUM_THREADS=1
+
+	./setup.py --prefix="$BLDDIR" --blaslib="-L$BLDDIR/lib -lopenblas" --cblas="-L$BLDDIR/lib -lopenblas" --lapacklib="-L$BLDDIR/lib -lopenblas" --lapclib="-L$BLDDIR/lib -lopenblas" --cflags="-O2 -fPIC -I$INCDIR" --fflags="-O2 -fPIC" --notesting --ldflags_c="-I$INCDIR"
+
+	cd $LIBDIR
+
+	gcc -fPIC -shared -o libquark.so -Wl,-whole-archive libquark.a -Wl,-no-whole-archive -L. -lhwloc
+	gcc -fPIC -shared -o libcoreblas.so -Wl,-whole-archive libcoreblas.a -Wl,-no-whole-archive -L. -lhwloc -lopenblas
+	gcc -fPIC -shared -o libplasma.so -Wl,-whole-archive libplasma.a -Wl,-no-whole-archive -L. -lcoreblas -lpthread -lquark -lhwloc -lopenblas
+
+	export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$LIBDIR/pkgconfig
+	export PLASMA_NUM_THREADS=$TOTAL_CORES
+	export R_PLASMA_NUM_THREADS=$TOTAL_CORES
+	####
+	
+	cd $BLDDIR
+	### Now for our MAGMA Library ###
+	if [ $gpuflag = 1 ]
+	then
+	
+
+
+	if [ ! -f "$BLDDIR/magma-1.2.1.tar.gz" ]
+	then
+		wget http://icl.cs.utk.edu/projectsfiles/magma/magma-1.2.1.tar.gz
+	fi
+
+	tar -xf magma-1.2.1.tar.gz
+	cd magma-1.2.1
+
+
+echo "#include<cuda.h>
+#include<cuda_runtime_api.h>
+#include<stdio.h>
+
+int main() {
+
+	int deviceCount = 0;
+	cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
+
+	int dev, driverVersion = 0, runtimeVersion = 0;
+	struct cudaDeviceProp deviceProp;	
+	int prev = 0;
+
+	for (dev = 0; dev < deviceCount; dev++) {	
+		cudaGetDeviceProperties(&deviceProp, dev);
+		if(deviceProp.major > prev)
+			prev = deviceProp.major;
+		}
+		if(prev >= 2)
+			printf(\"GPU_TARGET = Fermi\");
+		else
+			printf(\"GPU_TARGET = Tesla\");
+
+			return 0;
+}
+" > getDevice.c
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDADIR/lib64
+
+gcc -o getDevice -L$CUDADIR/lib64 -lcudart getDevice.c -I$CUDADIR/include
+
+./getDevice > make.inc
+
+echo "
+
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.2.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      June 2012
+#
+#      Contributed by: Allan Menezes (Ontario, Canada)
+#//////////////////////////////////////////////////////////////////////////////
+
+#
+# GPU_TARGET specifies for which GPU you want to compile MAGMA:
+#     Tesla (NVIDIA compute capability 1.x cards)
+#     Fermi (NVIDIA compute capability 2.x cards)
+# See http://developer.nvidia.com/cuda-gpus
+
+CC        = gcc
+NVCC      = $CUDADIR/bin/nvcc
+FORT      = gfortran
+
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
+
+OPTS      = -O3 -DADD_ -fPIC
+F77OPTS   = -O3 -DADD_ -fPIC
+FOPTS     = -O3 -DADD_ -x f95-cpp-input -fPIC
+NVOPTS    = -O3 -DADD_ --compiler-options '-fPIC',-fno-strict-aliasing -DUNIX
+LDOPTS    = -fPIC -Xlinker -zmuldefs
+
+LIB       = -lopenblas -lpthread -lcuda -lcudart -lcublas -lm -lplasma -coreblas -lquark
+
+CUDADIR   = $CUDADIR
+
+LIBDIR    = -L$LIBDIR -L$CUDADIR/lib64 -L/usr/lib64
+INC       = -I$CUDADIR/include
+		" >> make.inc
+	
+	cd src
+	rm zheevd_m.cpp
+	rm cheevd_m.cpp
+	if [ ! -f "$BLDDIR/src/magmapatch.tar.gz" ]
+	then
+		wget http://155.198.192.108/hiplar/wp-content/uploads/2012/08/magmapatch.tar.gz
+	fi
+
+	tar -xf magmapatch.tar.gz
+	cd ../
+	make
+
+	cd lib
+
+echo "####  Build Shared MAGMA Lib
+
+include ../make.inc
+
+all: shared
+LINKER = gcc
+LDFLAGS= -L$LIBDIR
+
+shared:
+	gcc -DMAGMA_WITH_PLASMA -fPIC -Xlinker -zmuldefs -shared -o libmagma.so -Wl,-whole-archive libmagma.a -Wl,-no-whole-archive -L. -lmagmablas
+	gcc -fPIC -Xlinker -zmuldefs -shared -o libmagmablas.so -Wl,-whole-archive libmagmablas.a -Wl,-no-whole-archive
+
+clean:
+	rm -rf libmagma.so
+	rm -rf libmagmablas.so
+	" > Makefile
+
+	make
+	cp *.so $LIBDIR
+	#cp *.a $LIBDIR
+	rm *.a
+	cd ../
+	echo "LIBMAGMA = $BLDDIR/magma-1.2.1/lib/libmagma.so
+	LIBMAGMABLAS = $BLDDIR/magma-1.2.1/lib/libmagmablas.so
+	" >> make.inc
+	cp include/*.h $BLDDIR/include/
+
+	cd testing
+	make clean
+	make
+
+	cd $BLDDIR
+
+	if [ ! -f HiPLARM_0.1.tar.gz ]
+	then
+	wget http://155.198.192.108/hiplar/wp-content/uploads/2012/08/HiPLARM_0.1.tar.gz
+	fi
+	if [ $gpuflag = 1 ]
+	then
+	R CMD INSTALL --configure-args="--with-lapack=-L$LIBDIR\ -lopenblas --with-plasma-lib=$BLDDIR --with-cuda-home=$CUDADIR --with-magma-lib=$BLDDIR" HiPLARM_0.1.tar.gz
+	fi
+	fi
+	
+	
+	if [ $gpuflag = 0 ]
+	then
+			if [ ! -f HiPLARM_0.1.tar.gz ]
+			then
+			wget http://155.198.192.108/hiplar/wp-content/uploads/2012/08/HiPLARM_0.1.tar.gz
+			fi
+		R CMD INSTALL --configure-args="--with-lapack=-L$LIBDIR\ -lopenblas --with-plasma-lib=$BLDDIR" HiPLARM_0.1.tar.gz
+	fi
+
+fi
+
+if [ $atlasflag = 1 ]
+then
+	cd $BLDDIR
+	
+	##### Start off by install hwloc ##########
+	if [ ! -f "$BLDDIR/hwloc-1.5.tar.gz" ]
+	then
+		wget http://www.open-mpi.org/software/hwloc/v1.5/downloads/hwloc-1.5.tar.gz
+
+	fi
+
+	if [ ! -d "$BLDDIR/hwloc-1.5" ]
+	then
+		tar -xf hwloc-1.5.tar.gz
+	fi
+
+	cd hwloc-1.5
+	./configure --prefix="$BLDDIR"
+	make && make install
+	export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$LIBDIR/pkgconfig
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBDIR
+
+	### Done #############
+
+	cd $BLDDIR
+																						
+	### Now get ATLAS ###
+
+	if [ ! -f "$BLDDIR/atlas3.10.0.tar.bz2" ]
+	then
+		  wget http://sourceforge.net/projects/math-atlas/files/Stable/3.10.0/atlas3.10.0.tar.bz2
+	fi
+
+	if [ ! -f "$BLDDIR/ATLAS" ]
+	then
+		tar -xf atlas3.10.0.tar.bz2
+	fi
+
+	if [ ! -f "$BLDDIR/lapack-3.4.1.tgz" ]
+	then
+		wget http://www.netlib.org/lapack/lapack-3.4.1.tgz
+	fi
+
+	cd ATLAS
+	if [ ! -d "build" ]
+	then
+		mkdir build
+	fi
+	
+	cd build
+	../configure --prefix="$BLDDIR" --shared --with-netlib-lapack-tarfile="$BLDDIR/lapack-3.4.1.tgz" -Fa alg '-fPIC -m64 -fPIC'
+	make
+	cd lib
+	make shared
+	make ptshared
+	make cshared
+	cp *.so $LIBDIR
+	cd ../
+	make install
+	cd $LIBDIR
+	gcc -fPIC -Xlinker -zmuldefs -shared -o liblapack.so -Wl,-whole-archive liblapack.a -Wl,-no-whole-archive -L. -lf77blas -lcblas -latlas -lgfortran
+	cd $BLDDIR
+	
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBDIR
+
+	### Now for PLASMA #############
+	if [ ! -f "$BLDDIR/plasma-installer_2.4.5.tar.gz" ]
+	then
+		wget http://icl.cs.utk.edu/projectsfiles/plasma/pubs/plasma-installer_2.4.5.tar.gz
+	fi
+	if [ ! -d "$BLDDIR/plasma-installer_2.4.5" ]
+	then
+		tar -xf plasma-installer_2.4.5.tar.gz
+	fi
+	cd plasma-installer_2.4.5
+
+	export ATLAS_NUM_THREADS=1
+
+	./setup.py --prefix="$BLDDIR" --blaslib="-L$BLDDIR/lib -lsatlas -llapack" --cflags="-O2 -fPIC -I$INCDIR" --fflags="-O2 -fPIC" --notesting --ldflags_c="-I$INCDIR" --downlapc
+
+
+	## Now we want to create shared libraries of PLASMA  ###
+
+	cd $LIBDIR
+
+	gcc -fPIC -shared -o libquark.so -Wl,-whole-archive libquark.a -Wl,-no-whole-archive -L. -lhwloc
+	gcc -fPIC -shared -o libcoreblas.so -Wl,-whole-archive libcoreblas.a -Wl,-no-whole-archive -L. -lquark -lhwloc -llapack -lsatlas -llapacke
+	gcc -fPIC -shared -o libplasma.so -Wl,-whole-archive libplasma.a -Wl,-no-whole-archive -L. -lcoreblas -lpthread -lquark -lhwloc -llapacke
+
+	export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$LIBDIR/pkgconfig
+	export PLASMA_NUM_THREADS=$TOTAL_CORES
+	export R_PLASMA_NUM_THREADS=$TOTAL_CORES
+	####
+	
+	cd $BLDDIR
+
+	## Now for MAGMA ##
+	if [ $gpuflag = 1 ]
+	then
+
+	if [ ! -f "$BLDDIR/magma-1.2.1.tar.gz" ]
+	then
+		wget http://icl.cs.utk.edu/projectsfiles/magma/magma-1.2.1.tar.gz
+	fi
+
+	tar -xf magma-1.2.1.tar.gz
+	cd magma-1.2.1
+
+
+echo "#include<cuda.h>
+#include<cuda_runtime_api.h>
+#include<stdio.h>
+
+int main() {
+
+	int deviceCount = 0;
+	cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
+
+	int dev, driverVersion = 0, runtimeVersion = 0;
+	struct cudaDeviceProp deviceProp;	
+	int prev = 0;
+
+	for (dev = 0; dev < deviceCount; dev++) {	
+		cudaGetDeviceProperties(&deviceProp, dev);
+		if(deviceProp.major > prev)
+			prev = deviceProp.major;
+		}
+		if(prev >= 2)
+			printf(\"GPU_TARGET = Fermi\");
+		else
+			printf(\"GPU_TARGET = Tesla\");
+
+			return 0;
+}
+
+" > getDevice.c
+		
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDADIR/lib64
+
+		gcc -o getDevice -L$CUDADIR/lib64 -lcudart getDevice.c -I$CUDADIR/include
+
+		./getDevice > make.inc
+
+
+echo "#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.2.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      June 2012
+#
+#      Contributed by: Allan Menezes (Ontario, Canada)
+#//////////////////////////////////////////////////////////////////////////////
+
+#
+# GPU_TARGET specifies for which GPU you want to compile MAGMA:
+#     Tesla (NVIDIA compute capability 1.x cards)
+#     Fermi (NVIDIA compute capability 2.x cards)
+# See http://developer.nvidia.com/cuda-gpus
+
+CC        = gcc
+NVCC      = $CUDADIR/bin/nvcc
+FORT      = gfortran
+
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
+
+OPTS      = -O3 -DADD_ -fPIC
+F77OPTS   = -O3 -DADD_ -fPIC
+FOPTS     = -O3 -DADD_ -x f95-cpp-input -fPIC
+NVOPTS    = -O3 -DADD_ --compiler-options '-fPIC',-fno-strict-aliasing -DUNIX
+LDOPTS    = -fPIC -Xlinker -zmuldefs
+
+LIB       = -llapack -lsatlas -lpthread -lcuda -lcudart -lcublas -lm -lcoreblas -lquark -lplasma -llapacke
+
+CUDADIR   = $CUDADIR
+
+LIBDIR    = -L$LIBDIR -L$CUDADIR/lib64 -L/usr/lib64
+INC       = -I$CUDADIR/include
+" >> make.inc
+	
+	cd src
+	rm zheevd_m.cpp
+	rm cheevd_m.cpp
+	if [ ! -f "$BLDDIR/src/magmapatch.tar.gz" ]
+	then
+		wget http://155.198.192.108/hiplar/wp-content/uploads/2012/08/magmapatch.tar.gz
+	fi
+
+	tar -xf magmapatch.tar.gz
+	cd ../
+	make
+
+	cd lib
+
+echo "####  Build Shared MAGMA Lib
+
+include ../make.inc
+
+all: shared
+LINKER = gcc
+LDFLAGS= -L$LIBDIR
+
+shared:
+	gcc -DMAGMA_WITH_PLASMA -fPIC -Xlinker -zmuldefs -shared -o libmagma.so -Wl,-whole-archive libmagma.a -Wl,-no-whole-archive -L. -lmagmablas
+	gcc -fPIC -Xlinker -zmuldefs -shared -o libmagmablas.so -Wl,-whole-archive libmagmablas.a -Wl,-no-whole-archive
+
+clean:
+	rm -rf libmagma.so
+	rm -rf libmagmablas.so
+" > Makefile
+
+	make
+	cp *.so $LIBDIR
+	#cp *.a $LIBDIR
+	rm *.a
+	cd ../
+echo "LIBMAGMA = $BLDDIR/magma-1.2.1/lib/libmagma.so
+LIBMAGMABLAS = $BLDDIR/magma-1.2.1/lib/libmagmablas.so
+" >> make.inc
+
+cp include/*.h $BLDDIR/include/
+
+	cd testing
+	make clean
+	make
+
+	cd $BLDDIR
+	if [ ! -f HiPLARM_0.1.tar.gz ]
+	then
+		wget http://155.198.192.108/hiplar/wp-content/uploads/2012/08/HiPLARM_0.1.tar.gz
+	fi
+	if [ $gpuflag = 1 ]
+	then
+	R CMD INSTALL --configure-args="--with-lapack=-L$LIBDIR\ -llapack\ -lsatlas --with-plasma-lib=$BLDDIR --with-cuda-home=$CUDADIR --with-magma-lib=$BLDDIR" HiPLARM_0.1.tar.gz
+	fi
+	fi
+
+	if [ $gpuflag = 0 ]
+	then
+	cd $BLDDIR
+	if [ ! -f HiPLARM_0.1.tar.gz ]
+	then
+		wget http://155.198.192.108/hiplar/wp-content/uploads/2012/08/HiPLARM_0.1.tar.gz
+	fi	
+	R CMD INSTALL --configure-args="--with-lapack=-L$LIBDIR\ -llapack\ -lsatlas --with-plasma-lib=$BLDDIR" HiPLARM_0.1.tar.gz
+	fi
+
+fi
+
+if [ $gpuflag = 1 ]
+then
+echo "##Creating Optimise Script##
+library(HiPLARM)
+OptimiseAll()
+" > optimiseScript.R
+
+Rscript optimiseScript.R
+
+rm optimiseScript.R
+fi
+
+#cleaning up
+rm *.tar.gz
+rm -r magma-1.2.1
+if [ $openflag = 1 ]
+then
+rm -r xianyi*
+fi
+if [ $atlasflag = 1 ]
+then
+	rm -r ATLAS
+fi
+rm -r plasma-installer*
+rm -r hwloc*
+rm *.bz2

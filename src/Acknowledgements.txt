@@ -1,0 +1,11 @@
+HiPLAR-M is designed to take advantage of the latest GPU and multi-core
+technologies whilst still maintaining the characteristics and ideas of the
+Matrix package on which it depends. To that end, we have kept the
+structure and code of the original Matrix package in place where
+possible whilst inserting our own specialised code for the MAGMA and
+PLASMA libraries with minimal changes. Some documentation of that
+package also appears in the HiPLAR-M documentation. We wish to
+acknowledge the work of Martin Maechler and Douglas Bates here as
+HiPLAR-M would not exist without their previous and ongoing work
+
+-The HiPLAR Team

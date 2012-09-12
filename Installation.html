@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>HiPLARM - Installation</title>
+
+<!-- Standard reset, fonts and grids -->
+<link rel="stylesheet" type="text/css" href="styles/reset-fonts-grids.css" />
+
+<!-- CSS for Menu -->
+<link rel="stylesheet" type="text/css" href="styles/sam/menu.css" />
+
+<!-- Dependency source files -->
+<script type="text/javascript" src="styles/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="styles/container_core.js"></script>
+
+<!-- Menu source file -->
+<script type="text/javascript" src="styles/menu.js"></script>
+<!-- styles for the whole website -->
+<link href="styles/styles.css" rel="stylesheet" type="text/css" />
+
+<!-- javascript for the menu -->
+<script type="text/javascript">
+    YAHOO.util.Event.onContentReady("graphgardenmainmenu", function () {
+    var oMenu = new YAHOO.widget.Menu("graphgardenmainmenu", { position: "static", hidedelay:  0, lazyload: true }); oMenu.render(); });
+  </script>
+<!-- end javascript for the menu -->
+
+</head>
+
+<body class="yui-skin-sam" id="yahoo-com">
+<div id="doc" class="yui-t1">
+  <div id="hd"> 
+    <!-- START: header -->
+    <div id="header"><a href="http://www.hiplar.org"><img id="by-jure" src="images/hiplar.png" alt="HiPLAR Project" /></a> <a href="http://www.imperial.ac.uk/"> </a></div>
+    <!-- END: header --> 
+  </div>
+  
+  <!-- START: left column -->
+  <div id="left-column"> 
+    <!--BEGIN left_column.html -->
+    
+     
+     <p>&nbsp;</p>
+    
+    <div id="graphgardenmainmenu" class="yuimenu">
+      <div class="bd">
+        <ul class="first-of-type">
+          <li class="yuimenuitem first-of-type"></li>
+          <li class="yuimenuitem"><a class="yuimenuitemlabel"  href="index.html">Home</a></li>
+          <li class="yuimenuitem"><a class="yuimenuitemlabel"  href="hiplar-b.html">HiPLAR-b</a>
+        <div id="hiplarb" class="yuimenu">
+          <div class="bd">
+            <ul>
+              <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-b.html">Home</a></li>
+		  <!-- #TAG
+		  <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-b-functionality.html">Functionality</a></li>
+              <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-b-benchmarks.html">Benchmarks</a></li>
+              <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-b-installation.html">Installation</a></li>
+	  	-->
+	  	</ul>
+          </div>
+          </div>
+          </li>
+          <li class="yuimenuitem"><a class="yuimenuitemlabel"  href="hiplar-M.html">HiPLARM</a>
+        <div id="hiplarM" class="yuimenu">
+          <div class="bd">
+            <ul>
+              <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-M.html">Home</a></li>
+              <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-M-functionality.html">Functionality</a></li>
+              <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-M-benchmarks.html">Benchmarks</a></li> 
+		  <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-M-examples.html">Examples</a></li>
+		  <li class="yuimenuitem"><a class="yuimenuitemlabel" href="hiplar-M-installation.html">Installation</a></li>
+            </ul>
+          </div>
+          </div>
+          </li>        
+           <li class="yuimenuitem"><a class="yuimenuitemlabel"  href="download.html">Download</a></li>  
+          <li class="yuimenuitem"><a class="yuimenuitemlabel"  href="aboutus.html">About Us</a></li>
+          <li class="yuimenuitem"><a class="yuimenuitemlabel"  href="news.html">Latest News</a></li>
+        </ul>
+      </div>
+                  
+      
+
+    </div>
+<p>&nbsp;
+</p>
+<p><a href="http://www.epsrc.ac.uk/"><img src="images/sponsor-bo-hires.png" alt="EPSRC" width="180" height="72" style="padding-left:30px;" /></a></p>
+    <!--END left_column.html --> 
+  </div>
+  <!-- END: left column --> 
+  
+  <!-- START: right column -->
+  <div id="right-column">
+
+    <h1>HiPLARM installation</h1>
+
+    <p>
+    Here we present the user with a guide to installing HiPLARM and the relevant prerequisite libraries needed by the package. Ideally, the user will
+    have an NVIDIA GPU and a multi-core CPU to take advantage of all aspects of the package. However, the user can continue only using the multi-core
+    aspect of the package if an NVIDIA GPU is not present. We recommend the user downloads our install script which fully automates the entire install process. For
+    more advanced users or those wishing to experiment with different aspects of the prerequisite libraries we provide some instructions below.
+    </p>
+	<ul style="font-size:18px">
+		<li><a href="#QuickStart" >Quick Start</a></li>
+		<li><a href="#Prerequisites" >Prerequisites</a> 
+		 	<ul style="font-size:16px;">
+		 		<li style="list-style-type:circle;"><a href="#CUDA" >CUDA</a></li>
+		 		<li style="list-style-type:circle;"><a href="#OptimisedBLAS">Optimised BLAS</a>
+					<ul style="font-size:14px">
+						<li style="list-style-type:square;"><a href="#OpenBLAS" >OpenBLAS</a> </li>
+						<li style="list-style-type:square;"><a href="#ATLAS">ATLAS</a></li>
+					</ul>
+				<li style="list-style-type:circle;"><a href="#R" >R</a></li>
+				<li style="list-style-type:circle;"><a href="#hwloc" >hwloc</a></li>
+				<li style="list-style-type:circle;"><a href="#PLASMA" >PLASMA</a></li>
+				<li style="list-style-type:circle;"><a href="#MAGMA" >MAGMA</a>
+					<ul style="font-size:14px">
+						<li style="list-style-type:square;"><a href="#MAGMAOpen">MAGMA with OpenBLAS</a></li>
+						<li style="list-style-type:square;"><a href="#MAGMAATL">MAGMA with ATLAS</a></li>					
+					</ul>				
+				</li>		 		
+				</li>
+			</ul>
+		</li>
+		<li><a href="#HiPLARM	" >HiPLARM</a>
+			<ul style="font-size:16px">
+				<li style="list-style-type:circle;"><a href="#Auto" >Auto Tuning HiPLARM</a></li>
+				<li style="list-style-type:circle;"><a href="#Using" >Using HiPLARM</a></li>
+			</ul>		
+		</li>	
+	</ul>
+	
+	<a name="QuickStart"></a><h2>Quick Start</h2>	
+	<p>
+	For users running on Linux distributions we have provided a build script that will download and install the prerequisite libraries
+	and the HiPLARM package. The script can be downloaded <a href="downloads/InstallScript">here</a>. It assumes the user
+	has downloaded and installed the CUDA libraries which are available from the NVIDIA <a href="http://developer.nvidia.com/cuda/cuda-downloads">website</a>
+	The user simply provides a build location and a location of the CUDA installation. If not the defaults are used. The user is also given an option
+	of using the ATLAS or OpenBLAS in the script. For example if the user wishes to use the ATLAS libraries.
+	</p>	
+	<div class="code">$:sh buildScript.sh --prefix=/home/jsmyth/Libraries \
+--cuda-home=/usr/local/cuda --with-atlas</div>
+	<p>
+	Or the OpenBLAS libraries
+</p>	
+	<div class="code">$:sh buildScript.sh --prefix=/home/jsmyth/Libraries \
+--cuda-home=/usr/local/cuda --with-openblas</div>
+
+	<p>If the user does not have an NVIDIA GPU on their system then the user can specify using the <tt>--no-gpu</tt> flag.</p>
+	<div class="code">$:sh buildScript.sh --prefix=/home/jsmyth/Libraries \
+--cuda-home=/home/jsmyth/cuda --with-openblas --no-gpu</div>
+
+<p>This downloads and installs the hwloc, OpenBLAS/ATLAS, PLASMA and MAGMA shared libraries as well as the HiPLARM package. 
+The script also performs auto-tuning on the HiPLARM routines.</p>
+<a href="#TOP" >Back to top</a>
+
+	<a name="Prerequisites"></a><h2> HiPLARM Prerequisites </h2>
+	<p>
+	For more advanced users we will provide a brief description of the prerequisite libraries and their install procedures. These steps are merely guidelines
+	and to gain full advantage of the libraries we recommend the user read the documentation provided on the relevant websites. The user may also use the script as
+	a reference for installing the software stack below.
+	</p>
+	<a name="CUDA"></a><h3>CUDA</h3>
+	<p>
+	CUDA is NVIDIA's parallel computing architecture. Currently, HiPLARM can only run on NVIDIA GPUs and so users must download the relevant drivers
+	and the CUDA toolkit. The toolkit is available <a href="http://developer.nvidia.com/cuda/cuda-downloads">here</a>. Simply follow the instructions
+	given and CUDA will be ready for use. The user should remember to set the <tt>LD_LIBRARY_PATH</tt> and <tt>PATH</tt> variables. Of course for users
+	who do not have GPU enabled systems they can forego the GPU related libraries.
+	</p>
+
+	<a name="OptimisedBLAS"></a><h3>Optimised BLAS</h3>
+	<p>
+	For optimal performance of the PLASMA and MAGMA libraries it is crucial that the user provides an optimised version of the BLAS routines. As described in the
+	PLASMA installation guide, the use of Netlib BLAS will produce an order of magnitude slower than optimised BLAS routines such as ATLAS or OpenBLAS. 
+	</p>
+<p>
+<strong>Note:</strong> We mention only OpenBLAS and ATLAS here as that is what we have tested the package with. Users are not confined to these and can use other versions such as MKL and ACML. 
+The user will just need to ensure that the correct flags are used for each package. The MAGMA library contains sample makefiles for different versions and PLASMA instructions can be seen on the
+PLASMA website. 
+</p>
+<p> </p>
+<a name="OpenBLAS"></a><h4><strong>OpenBLAS</strong></h4>
+<p><a href="https://github.com/xianyi/OpenBLAS">OpenBLAS</a> is an optimised BLAS library based on the GotoBLAS project, however, it should be noted that the GotoBLAS is no longer being updated. For the installation of OpenBLAS the procedure is relatively simple. The user can download the package as zip or tar file
+	<a href="https://github.com/xianyi/OpenBLAS/downloads">here</a>. We suggest that the user creates a single directory for all the relevant files and folders. For 
+	demonstration purposes we will refer to it as <tt>BLDDIR</tt>.
+	</p>	
+	<div class="code">$:export BLDDIR=/home/jsmyth/Libraries
+$: tar -xf xianyi-OpenBLAS-v0.2.2-0-g71d29fa.tar.gz
+$: cd OpenBLAS
+#In the Makefile.rule file set NO_AFFINITY=1#
+$: make
+$: make PREFIX=$BLDDIR install
+</div>
+<p>The install process will automatically detect the system settings and optimise the library depending on these.</p>
+
+<a name="ATLAS"></a><h4><strong> ATLAS</strong></h4>
+<p><a href="http://math-atlas.sourceforge.net/">ATLAS</a> is Automatically Tuned Linear Algebra Library and provides an optimised version of BLAS routines for C and Fortran. A certain amount of
+LAPACK routines are also provided but a full LAPACK package can be provided also and our instructions will cater for this. In addition, we will be compiling shared versions of the libraries. 
+We suggest the user interested in exacting the most optimal performance to read the detailed <a href="http://math-atlas.sourceforge.net/atlas_install/">documentation</a> provided 
+on the ATLAS website. ATLAS also provides multi-threaded versions of the libraries for parallel computation. 
+Prior to starting the user should download the latest LAPACK version <a href="http://www.netlib.org/lapack/">here</a> and the 
+latest version of the ATLAS library <a href="http://sourceforge.net/projects/math-atlas/files">here</a>. 
+</p>
+<p><strong>Note:</strong> ATLAS requires CPU throttling to be turned off. For more information on how to
+do this see <a href="http://math-atlas.sourceforge.net/atlas_install/node5.html" >here</a>.</p>
+<div class="code">$: tar -xf atlas3.10.0.tar.bz2
+$:cd ATLAS
+$:mkdir build
+$:cd build
+$:../configure --prefix="$BLDDIR" --shared \
+--with-netlib-lapack-tarfile="$BLDDIR/lapack-3.4.1.tgz" \
+-Fa alg '-fPIC -m64 -fPIC'
+$:make
+$:cd lib 
+$:make shared
+#for threaded shared libs#
+$:make ptshared
+# Now for lapack shared library #
+$:gcc -fPIC -Xlinker -zmuldefs -shared -o liblapack.so \
+-Wl,-whole-archive liblapack.a -Wl,-no-whole-archive \
+-L. -lf77blas -lcblas -latlas -lgfortran
+$:cp *.so $BLDDIR/lib
+$:cd ../
+$:make install
+</div>
+
+<a name="R"></a><h3> R </h3>
+<p> User should ensure that they have a correctly compiled version of R. R should be compiled with the <tt>--enable-BLAS-shlib</tt> flag. Also, for completeness uses should build R linking to the version
+of optimised BLAS they use, whether that be the versions mentioned above or another version. Some examples for the config file are provided here.
+<div class="code">./configure --with-x=no \
+--with-blas="-L/usr/local/atlas_3.8.4/lib -lf77blas -latlas" \
+--with-lapack="-L/usr/local/atlas_3.8.4/lib -llapack -lcblas" \ 
+--prefix=/home/jsmyth/opt --enable-R-shlib</div>
+<p>or for OpenBLAS</p>
+<div class="code">./configure --with-x=no \
+--with-blas="-L/usr/local/openblas/lib -lopenblas" \
+--with-lapack="-L/usr/local/openblas/lib -lopenblas"\
+--prefix=/home/jsmyth/opt --enable-R-shlib
+</div>
+<p>Where the atlas libraries are installed in <tt>/usr/local/atlas_3.8.4/lib</tt> and the openblas libraries in <tt>/usr/local/openblas/lib</tt> for this user. They may be located in other directories
+depending on the initial installation. For more detailed information the user should refer to the R administration and 
+installation page <a href="http://cran.r-project.org/doc/manuals/R-admin.html">here</a>.</p>
+<a href="#TOP" >Back to top</a>
+<a name="hwloc"></a><h3> hwloc</h3>
+<p><a href="http://www.open-mpi.org/projects/hwloc">hwloc</a> is a software package for assessing the topology of multi-core systems. It determines components such as cores, sockets, caches and NUMA nodes 
+	and other features. hwloc can be downloaded <a href="http://www.open-mpi.org/projects/hwloc">here</a> and is part of the OpenMPI project. hwloc also uses the pkg-config utility in order
+	to detected by other libraries such as PLASMA. This can be downloaded using the apt-get command line utility for Linux distributions e.g. <tt>sudo apt-get hwloc</tt>. </p>
+	<div class="code">$:tar -xf hwloc-1.5.tar.gz
+$:cd hwloc-1.5
+$:./configure --prefix=$BLDDIR
+$:make && make install
+</div>
+<p>Following this the user should update the <tt>PKG_CONFIG_PATH</tt> and <tt>LD_LIBRARY_PATH</tt></p>
+<div class="code">export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$BLDDIR/lib/pkgconfig
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BLDDIR/lib
+</div>
+
+<!--<h3>R</h3>
+<p> </p>
+-->
+<a name="PLASMA"></a><h3>PLASMA</h3>
+<p>	<a href="http://icl.eecs.utk.edu/plasma/">PLASMA</a> is Parallel Linear Algebra for Scalable Multi-core Architectures and is one of the major libraries underpinning the HiPLARM package 
+	and provides high performance LAPACK and BLAS routines for shared-memory, multi-core systems. As before, if the user is building the libraries outside our build script we recommend they
+	read the PLASMA <a href="http://icl.eecs.utk.edu/plasma">installation guide</a> prior to installation. We will provide the user with two installation examples, using ATLAS and OpenBLAS.
+	Again, we assume that the libraries mentioned prior are installed in <tt>$BLDDIR/lib</tt> directory. 
+	</p>
+	<p>
+
+	Note: It is important that the user uses single threaded BLAS. Note ATLAS does not have any dynamic setting for thread number so users should use the single threaded ATLAS explicitly. 
+	If multi-threaded BLAS is installed set the thread number to 1.
+	e.g </p>
+<div class="code">$:export OPENBLAS_NUM_THREADS=1
+# OR #
+$:export OMP_NUM_THREADS=1
+</div>
+<p>Similarly if the user is using other versions of BLAS e.g MKL, ACML the same procedure should be followed </p>
+	<p>
+	Using OpenBLAS
+	</p>
+	
+<div class="code">$:tar -xf plasma-installer_2.4.5.tar.gz
+$:cd plasma-installer
+$:./setup.py --prefix="$BLDDIR" --blaslib="-L$BLDDIR/lib -lopenblas" \
+--lapclib="-L$BLDDIR/lib -lopenblas" \
+--cflags="-O2 -fPIC -I$BLDDIR/include" \
+--fflags="-O2 -fPIC" --notesting \
+--ldflags_c="-I$BLDDIR/include" 
+$:cd $BLDDIR/lib
+# Make shared libraries #
+$:gcc -fPIC -shared -o libquark.so \
+-Wl,-whole-archive libquark.a \
+-Wl,-no-whole-archive -L . -lhwloc
+$:gcc -fPIC -shared -o libcoreblas.so \
+-Wl,-whole-archive libcoreblas.a \
+-Wl,-no-whole-archive -L. -lquark -lopenblas
+$:gcc -fPIC -shared -o libplasma.so \
+-Wl,-whole-archive libplasma.a \
+-Wl,-no-whole-archive -L. -lcoreblas -lpthread -lquark
+</div>
+
+<p>
+	Using ATLAS</p>
+<div class="code">$:tar -xf plasma-installer_2.4.5.tar.gz
+$:cd plasma-installer
+$:./setup.py --prefix="$BLDDIR" \
+--blaslib="-L$BLDDIR/lib -lsatlas -llapack" \
+--cflags="-O2 -fPIC -I$INCDIR" --fflags="-O2 -fPIC" \
+--notesting --ldflags_c="-I$INCDIR" --downlapc
+$:cd $BLDDIR/lib
+# Make shared libraries #
+$:gcc -fPIC -shared -o libquark.so \
+-Wl,-whole-archive libquark.a \
+-Wl,-no-whole-archive -L . -lhwloc
+$:gcc -fPIC -shared -o libcoreblas.so \
+-Wl,-whole-archive libcoreblas.a \
+-Wl,-no-whole-archive -L. -lquark -llapack -lsatlas -llapacke
+$:gcc -fPIC -shared -o libplasma.so \
+-Wl,-whole-archive libplasma.a \
+-Wl,-no-whole-archive -L. -lcoreblas -lpthread -lquark -llapacke
+</div>
+<a href="#TOP" >Back to top</a>
+<a name="MAGMA"></a><h3>MAGMA</h3>
+<p>The <a href="http://icl.cs.utk.edu/magma/index.html">MAGMA</a> library is the second major library underpinning the HiPLARM project. It is a dense linear algebra library designed for
+heterogeneous and hybrid architectures, specifically, multi-core and GPU systems. There is also some support now for multi-GPU systems. 
+The MAGMA library is intended to work optimally on top of the software stack detailed above and so we recommend the user follows the instructions above first and installs the relevant libraries. 
+Further documentation on the library is available <a href="http://icl.cs.utk.edu/magma/custom/index.html?lid=126&slid=234">here</a> and can be 
+downloaded <a href="http://icl.cs.utk.edu/magma/software/index.html">here</a>. There are instructions for different architectures included in 
+the downloadable package but we will assume the user has followed a similar process to that already described. 
+We will provide instructions for OpenBLAS and ATLAS libraries in addition to instructions on how to build shared libraries for the MAGMA package. 
+This will require some additional patches for the MAGMA source code which we have provided on our server <a href="www.hiplar.org/downloads/magmapatch.tar.gz">here</a>.
+</p>
+<p></p>
+Before starting the build process the user needs to perform the following:
+
+<ol>
+<li>Download and unpack MAGMA</li>
+<li>Enter <tt>src</tt> folder in the MAGMA directory</li>
+<li>Delete zheevd_m.cpp</li>
+<li>Delete cheevd_m.cpp</li>
+<li>Download and unpack our <a href="downloads/magmapatch.tar.gz">patch</a> in the same <tt>src</tt> directory</li>
+<li>Edit the make.inc file in the the main magma directory with the code below</li>
+</ol>
+
+ 
+<a name="MAGMAOpen"></a><strong>MAGMA with OpenBLAS</strong>
+<p>Take the make.inc.goto and copy to make.inc. Using a text editor alter the following in the makefile: </p>
+<div class="code">
+OPTS      = -O3 -DADD_ -fPIC
+F77OPTS   = -O3 -DADD_ -fPIC
+FOPTS     = -O3 -DADD_ -x f95-cpp-input -fPIC
+
+NVOPTS    = -O3 -DADD_ \
+	    --compiler-options '-fPIC',-fno-strict-aliasing\
+	    -DUNIX
+LDOPTS    = -fPIC -Xlinker -zmuldefs
+
+LIB       = -lopenblas -lpthread -lcuda -lcudart -lcublas \
+	    -lm -lcoreblas -lquark -lplasma
+	    
+CUDADIR   = $CUDADIR
+
+LIBDIR    = -L$LIBDIR -L$CUDADIR/lib64 -L/usr/lib64
+INC       = -I$CUDADIR/include
+</div>
+<p>Where <tt>$CUDADIR</tt> and <tt>$LIBDIR</tt> are where CUDA and the OpenBLAS and other libraries mentioned above are installed. There are
+some settings that are not mentioned above but contained in the file. The user must also specify if they have a Fermi or 
+Tesla GPU, but this is apparent in the full make.inc file. </p>
+<p></p>
+<p>Following this the user must build shared versions of the libraries. Enter the <tt>lib</tt> directory
+in the main magma folder and execute the following: </p>
+<div class="code">$:gcc -fPIC -Xlinker -zmuldefs -shared -o libmagmablas.so \
+-Wl,-whole-archive libmagmablas.a -Wl,-no-whole-archive
+
+$:gcc -DMAGMA_WITH_PLASMA -fPIC -Xlinker -zmuldefs \
+-shared -o libmagma.so -Wl,-whole-archive libmagma.a \
+-Wl,-no-whole-archive -L. -lmagmablas
+</div>
+<p>The libraries are now ready for use and the user can place them in a directory of their choice. The user should
+also be aware that the header files in the <tt>include</tt> directory are also required by HiPLARM.
+</p>
+
+<a name="MAGMAATL"></a><strong>MAGMA with ATLAS</strong>
+<p>	If the user has decided to use the ATLAS library then the instructions below should be followed. We assume
+	the user has followed or read steps 1 to 6 in this section.
+	</p>
+	<p></p>
+	<p>Take the make.inc.atlas in the main magma directory and copy to make.inc. Using a text editor
+make the following changes/additions:
+</p>
+<div class="code">
+OPTS      = -O3 -DADD_ -fPIC
+F77OPTS   = -O3 -DADD_ -fPIC
+FOPTS     = -O3 -DADD_ -x f95-cpp-input -fPIC
+NVOPTS    = -O3 -DADD_ --compiler-options '-fPIC', \
+	    -fno-strict-aliasing -DUNIX
+LDOPTS    = -fPIC -Xlinker -zmuldefs
+
+LIB       = -llapack -lsatlas -lpthread -lcuda -lcudart -lcublas \
+	    -lm -lcoreblas -lquark -lplasma -llapacke
+
+CUDADIR   = $CUDADIR
+
+LIBDIR    = -L$LIBDIR -L$CUDADIR/lib64 -L/usr/lib64
+INC       = -I$CUDADIR/include
+</div>
+<p>Again <tt>$LIBDIR</tt> is the directory where all the libraries described above are installed. If these are in
+alternate locations then each location should be entered.<tt>$CUDADIR</tt> is the directory of the cuda installation.
+</p>
+<p></p>
+<p>Following this the user must build shared versions of the libraries. Enter the <tt>lib</tt> directory
+in the main magma folder. </p>
+<div class="code">$:gcc -fPIC -Xlinker -zmuldefs -shared -o libmagmablas.so \
+-Wl,-whole-archive libmagmablas.a -Wl,-no-whole-archive
+
+$:gcc -DMAGMA_WITH_PLASMA -fPIC -Xlinker -zmuldefs \
+-shared -o libmagma.so -Wl,-whole-archive libmagma.a \
+-Wl,-no-whole-archive -L. -lmagmablas
+</div>
+
+<p>The libraries are now ready for use and the user can place them in a directory of their choice. The user should
+also be aware that the header files in the <tt>include</tt> directory are also required by HiPLARM.
+</p>
+<a href="#TOP" >Back to top</a>
+<a name="HiPLARM"></a><h2>HiPLARM Installation</h2>
+<p>	HiPLARM is installed like regular R packages with some extra configure flags. Following downloading from CRAN or our website the user can use the <tt>R CMD INSTALL</tt> command 
+	to install the HiPLARM package. The following is an example using the ATLAS optimised BLAS routines. 
+	</p>
+
+<div class="code">R CMD INSTALL --configure-args="--with-lapack= \
+-L/home/jsmyth/Numerical/lib\ -llapack -lsatlas \
+--with-plasma-lib=/home/jsmyth/Numerical \
+--with-cuda-home=/usr/local/cuda \
+--with-magma-lib=/home/jsmyth/Numerical" HiPLARM_0.1.tar.gz
+</div>
+
+<p>Note: This assumes a user called jsmyth has installed all the relevant libraries in <tt>/home/jsmyth/Numerical/lib</tt> and includes in 
+<tt>/home/jsmyth/Numerical/include</tt> The user should also ensure prior to building HiPLAR that <tt>LD_LIBRARY_PATH</tt> is set to the
+correct directory or directories. </p>
+
+<p> </p>
+<p>Should the user wish to build HiPLARM with OpenBLAS the following command can be used: </p>
+<div class="code">R CMD INSTALL --configure-args="--with-lapack= \
+-L/home/jsmyth/Numerical/lib\ -lopenblas \
+--with-plasma-lib=/home/jsmyth/Numerical \
+--with-cuda-home=/usr/local/cuda \
+--with-magma-lib=/home/jsmyth/Numerical" HiPLARM_0.1.tar.gz
+</div>
+<p>Again we assume that all the prerequisite libraries are installed in a single directory, which, in the example is  <tt>/home/jsmyth/Numerical/lib</tt>.
+</p>
+
+<a name="Auto"></a><h3>Auto-tuning HiPLARM</h3>
+<p>	In HiPLARM we have provided an auto-tuning functionality that allows the user to take optimal advantage of their system architecture. For smaller
+	matrix sizes it is less optimal to use GPUs as the cost of transferring the data outweighs the speed of computation. It is here that PLASMA
+	will provide the computational advantage, whilst for larger sizes this will be achieved using MAGMA and GPUs. The auto-tuning suite will provide
+	this crossover point to make optimal use of the hardware for the given problem size. The suite can be run once after installation and these values
+	are saved for future use. This is automatically run as part of our install script but the user can run the feature themselves, targeting all or particular
+	routines. 
+	</p>
+	<p>
+	In R itself
+	</p>
+<!--<div class="code">> library(HiPLARM)
+> OptimiseAll(128, FALSE)
+</div>-->
+<div style="overflow:hidden;background:#eeeeee"><div class="geshifilter"><pre class="r geshifilter-R" style="font-family:Courier;"><a href="http://inside-r.org/r-doc/base/library" target="_blank"><span style="color: #003399; font-weight: bold;">library</span></a><span style="color: #009900;">&#40;</span>HiPLARM<span style="color: #009900;">&#41;</span>
+OptimiseAll<span style="color: #009900;">&#40;</span><span style="color: #cc66cc;">128</span><span style="color: #339933;">,</span> <span style="color: #000000; font-weight: bold;">FALSE</span><span style="color: #009900;">&#41;</span></pre></div></div>
+
+<p>Note: The value of 128 is the difference between the test problem sizes. For a more accurate crossover point the user can choose smaller sizes but 128 should be sufficient.
+The <tt>TRUE</tt> value denotes the verbose option, i.e. if <tt>TRUE</tt> all timing information will be output etc.</p>The user can also target specific routines using
+separate optimisation functions e.g. OptimiseChol(), documentation on these and their use is provided in the package within R using ?OptimiseChol() etc.
+</p>
+<a name="Using" ></a><h3>Using HiPLARM</h3>
+<p>	The user uses HiPLARM much in the same way as the regular Matrix package in R. Simply load the package in the usual fashion and begin using
+the routines. Before starting R and loading HiPLARM the user should ensure that their LD_LIBRARY_PATH variable is pointing to the right directories containing the prerequisite
+libraries.</p>
+<div class="code">$:export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jsmyth/libraries/lib
+</div>
+<p>In addition, the user should be aware of some setting that may impact performance. For optimal use the user should set the following system variables: </p>
+	<ul>
+	<li>The user should only use single threaded BLAS with PLASMA.</li>
+	<li>If multi-core BLAS is installed ensure thread number is set to 1, e.g OPENBLAS_NUM_THREADS=1.
+	OMP_NUM_THREADS=1. However, in the case of ATLAS there is no setting for this so the user should ensure they are using 
+	the single threaded ATLAS. The single threaded ATLAS is generally called <tt>satlas</tt> so users should link to this.</li>
+	<li>For HiPLARM there is an environment variable R_PLASMA_NUM_THREADS that sets the number of cores to use.
+	The user should not set R_PLASMA_NUM_THREADS to greater than the number of actual cores. Note: most modern
+	Intel processors have hyper-threading. These are not actual cores and so if the user does not know the exact
+	architecture, divide the total amount of cores apparent on the machine by 2. e.g. On an Intel E5640 the machine
+	sees 8 cores when there are in fact only 4 actual cores. The install script does have a routine that checks the system
+	for the true amount of cores.</li>
+	</ul>
+	
+<!-- <div class="code">>library(HiPLARM)
+> A <- Matrix(rnorm(4096 * 4096), ncol=4096)
+> B <- Matrix(rnorm(4096 * 4096), ncol=4096)
+> A %*% B
+</div>-->
+<div style="overflow:hidden;background:#eeeeee"><div class="geshifilter"><pre class="r geshifilter-R" style="font-family:Courier;"><a href="http://inside-r.org/r-doc/base/library" target="_blank"><span style="color: #003399; font-weight: bold;">library</span></a><span style="color: #009900;">&#40;</span>HiPLARM<span style="color: #009900;">&#41;</span>
+A <span style="">&lt;-</span> <a href="http://www.inside-r.org/r-doc/Matrix/Matrix" target="_blank"><span style="color: #003399; font-weight: bold;">Matrix</span></a><span style="color: #009900;">&#40;</span><a href="http://inside-r.org/r-doc/stats/rnorm" target="_blank"><span style="color: #003399; font-weight: bold;">rnorm</span></a><span style="color: #009900;">&#40;</span><span style="color: #cc66cc;">4096</span> <span style="">*</span> <span style="color: #cc66cc;">4096</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">,</span> <a href="http://inside-r.org/r-doc/base/ncol" target="_blank"><span style="color: #003399; font-weight: bold;">ncol</span></a>=<span style="color: #cc66cc;">4096</span><span style="color: #009900;">&#41;</span>
+B <span style="">&lt;-</span> <a href="http://www.inside-r.org/r-doc/Matrix/Matrix" target="_blank"><span style="color: #003399; font-weight: bold;">Matrix</span></a><span style="color: #009900;">&#40;</span><a href="http://inside-r.org/r-doc/stats/rnorm" target="_blank"><span style="color: #003399; font-weight: bold;">rnorm</span></a><span style="color: #009900;">&#40;</span><span style="color: #cc66cc;">4096</span> <span style="">*</span> <span style="color: #cc66cc;">4096</span><span style="color: #009900;">&#41;</span><span style="color: #339933;">,</span> <a href="http://inside-r.org/r-doc/base/ncol" target="_blank"><span style="color: #003399; font-weight: bold;">ncol</span></a>=<span style="color: #cc66cc;">4096</span><span style="color: #009900;">&#41;</span>
+A <span style="">%*%</span> B</pre></div></div>
+<p></p>
+<a href="#TOP" >Back to top</a>
+	<h2> A note on Windows and Mac</h2>
+
+<p>
+  Currently not supported but may be in the future.
+  
+</p>
+
+</div>
+  <!-- END: right column -->
+  
+  <div id="footer"> (C) 2012 Imperial College London 
+    <!-- you can put something here --> 
+  </div>
+</div>
+
+<!--
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript">
+
+try {
+var pageTracker = _gat._getTracker("UA-342639-4");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+-->
+</body>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+</html>
